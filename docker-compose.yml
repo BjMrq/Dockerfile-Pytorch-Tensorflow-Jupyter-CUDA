@@ -1,8 +1,8 @@
 version: "3"
 services:
   jupyter:
-    build:
-      context: .
+    # build:
+    #   context: .
     image: bjmrq/jupyter
     container_name: jupyter
     volumes:
