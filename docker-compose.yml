@@ -1,0 +1,18 @@
+version: "3"
+services:
+  jupyter:
+    build:
+      context: .
+    image: bjmrq/jupyter
+    container_name: jupyter
+    volumes:
+      - ./:/home/workspace
+    env_file: .env.exemple
+    environment:
+      PASSWORD: "${PASSWORD}"
+      GRANT_SUDO: "${GRANT_SUDO}"
+    ports:
+      - 8888:8888
+      - 6006:6006
+    user: "root"
+    working_dir: /home/workspace
