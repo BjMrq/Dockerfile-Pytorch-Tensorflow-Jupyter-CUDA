@@ -8,9 +8,6 @@ services:
     volumes:
       - ./:/home/workspace
     env_file: .env.exemple
-    environment:
-      PASSWORD: "${PASSWORD}"
-      GRANT_SUDO: "${GRANT_SUDO}"
     ports:
       - 8888:8888
       - 6006:6006

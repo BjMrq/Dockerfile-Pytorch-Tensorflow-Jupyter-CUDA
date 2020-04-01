@@ -10,12 +10,17 @@ RUN /opt/conda/bin/conda install -y nodejs tensorflow pandas scikit-learn matplo
 RUN jupyter labextension install jupyterlab_tensorboard
 
 # Pip install the dependencies
-RUN pip install jupyter_tensorboard \
+RUN pip install --upgrade jupyter_tensorboard \
+  jupyterthemes \ 
   torchvision \
   scikit-image \
   flake8 \
   jupyter_contrib_nbextensions \
   autopep8
+
+# Adding some styling to the mix
+RUN apt-get update
+RUN apt install fonts-firacode
 
 # Create workspace
 RUN mkdir -p /home/workspace
