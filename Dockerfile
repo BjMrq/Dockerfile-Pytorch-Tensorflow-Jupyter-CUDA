@@ -18,6 +18,8 @@ RUN pip install --upgrade jupyter_tensorboard \
   jupyter_contrib_nbextensions \
   autopep8
 
+RUN jupyter contrib nbextension install 
+
 # Adding some styling to the mix
 RUN apt-get update
 RUN apt install fonts-firacode
