@@ -2,7 +2,7 @@
 FROM pytorch/pytorch:latest
 
 # Install other ML dependencies including Tensorflow and Jupiter
-RUN /opt/conda/bin/conda install -y nodejs tensorflow pandas scikit-learn matplotlib seaborn jupyter jupyterlab && \
+RUN /opt/conda/bin/conda install -y nodejs tensorflow pandas scikit-learn nbconvert matplotlib seaborn jupyter jupyterlab && \
   /opt/conda/bin/conda install -c conda-forge tensorboardx && \
   /opt/conda/bin/conda clean -ya
 
