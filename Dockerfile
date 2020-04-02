@@ -18,7 +18,10 @@ RUN pip install --upgrade jupyter_tensorboard \
   jupyter_contrib_nbextensions \
   autopep8
 
+#  Enable extensions
 RUN jupyter contrib nbextension install 
+RUN jupyter nbextension enable jupyter-autopep8-master/jupyter-autopep8
+RUN jupyter nbextension enable hinterland/hinterland 
 
 # Adding some styling to the mix
 RUN apt-get update
