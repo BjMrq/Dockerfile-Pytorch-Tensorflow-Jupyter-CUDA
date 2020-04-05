@@ -1,42 +1,134 @@
-# Start from the Pytorch container containing CUDA
-FROM pytorch/pytorch:latest
+# Step 1 CUDA
+# ============================================================================
 
-# Install other ML dependencies including Tensorflow and Jupyter
-RUN /opt/conda/bin/conda install -y nodejs \
-  tensorflow \
-  pandas \
+ARG UBUNTU_VERSION=18.04
+ARG ARCH=
+ARG CUDA=10.1
+
+# Start from the Pytorch container containing CUDA
+FROM nvidia/cuda${ARCH:+-$ARCH}:${CUDA}-base-ubuntu${UBUNTU_VERSION} as base
+
+# ARCH and CUDA are specified again because the FROM directive resets ARGs
+# (but their default value is retained if set previously)
+ARG ARCH
+ARG CUDA
+ARG CUDNN=7.6.4.38-1
+ARG CUDNN_MAJOR_VERSION=7
+ARG LIB_DIR_PREFIX=x86_64
+ARG LIBNVINFER=6.0.1-1
+ARG LIBNVINFER_MAJOR_VERSION=6
+
+# Needed for string substitution
+SHELL ["/bin/bash", "-c"]
+# Pick up some TF dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  build-essential \
+  cuda-command-line-tools-${CUDA/./-} \
+  # There appears to be a regression in libcublas10=10.2.2.89-1 which
+  # prevents cublas from initializing in TF. See
+  # https://github.com/tensorflow/tensorflow/issues/9489#issuecomment-562394257
+  libcublas10=10.2.1.243-1 \ 
+  cuda-nvrtc-${CUDA/./-} \
+  cuda-cufft-${CUDA/./-} \
+  cuda-curand-${CUDA/./-} \
+  cuda-cusolver-${CUDA/./-} \
+  cuda-cusparse-${CUDA/./-} \
+  cmake \
+  git \
+  curl \
+  ca-certificates \
+  libjpeg-dev \
+  libpng-dev \
+  libcudnn7=${CUDNN}+cuda${CUDA} \
+  libfreetype6-dev \
+  libhdf5-serial-dev \
+  libzmq3-dev \
+  pkg-config \
+  software-properties-common \
+  unzip 
+
+# Install TensorRT if not building for PowerPC
+RUN [[ "${ARCH}" = "ppc64le" ]] || { apt-get update && \
+  apt-get install -y --no-install-recommends libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
+  libnvinfer-plugin${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*; }
+
+# For CUDA profiling, TensorFlow requires CUPTI.
+ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+
+# Link the libcuda stub to the location where tensorflow is searching for it and reconfigure
+# dynamic linker run-time bindings
+RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 \
+  && echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf \
+  && ldconfig
+
+
+# Step2 Conda, Python and Jupiter
+# ============================================================================
+
+ARG PYTHON_VERSION=3.6
+
+RUN curl -o ~/miniconda.sh -O  https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh  && \
+  chmod +x ~/miniconda.sh && \
+  ~/miniconda.sh -b -p /opt/conda && \
+  rm ~/miniconda.sh
+
+ENV PATH /opt/conda/bin:$PATH
+
+# Install Python and Jupyter
+RUN /opt/conda/bin/conda install -y \
+  python=$PYTHON_VERSION \
+  jupyter
+
+
+# Step3 ML packages
+# ============================================================================
+
+# Install Pytorch from pytorch channel 
+RUN opt/conda/bin/conda install -y -c pytorch \
+  pytorch \
+  torchvision \
+  magma-cuda100
+
+# Install Tensorflow from conda-forge channel 
+RUN opt/conda/bin/conda install -y -c conda-forge \
+  tensorflow-gpu \
+  tensorboard \   
+  tensorboardx \
+  jupyter_contrib_nbextensions
+
+RUN /opt/conda/bin/conda install -y  \
   scikit-learn \
+  pandas \
   matplotlib \
   seaborn \
-  jupyter \
+  numpy \
+  pyyaml \
+  scipy \
+  ipython \
+  nodejs \
   nbconvert \
-  jupyterlab \
-  black && \
-  /opt/conda/bin/conda install -c conda-forge tensorboardx && \
-  /opt/conda/bin/conda clean -ya
-
-# Install Tensorboard
-RUN jupyter labextension install jupyterlab_tensorboard
-
-# Pip install the dependencies
-RUN pip install --upgrade jupyter_tensorboard \
-  jupyterthemes\
-  torchvision \
   scikit-image \
-  jupyter_contrib_nbextensions \
-  yapf \
-  autopep8
+  mkl-include \
+  cython 
+
+# Cleanning
+RUN opt/conda/bin/conda clean -ya
 
 # Enable extension
 RUN jupyter contrib nbextension install 
 
+# Install tensorboard for Jupyter
+RUN pip install jupyter_tensorboard
+
 # Make it working directory
 WORKDIR /home/workspace
+
+# Open port for Jupyter notebook
+EXPOSE 8888
 
 # Open port for Tensorboard
 EXPOSE 6006
 
-# Open port for tensorboard Jupyter notebook
-EXPOSE 8888
-
-CMD ["jupyter", "notebook", "--ip", "0.0.0.0", "--port", "8888", "--allow-root"]
+CMD ["jupyter", "notebook", "--ip", "0.0.0.0", "--port", "8888", "--notebook-dir=/home/workspace", "--no-browser", "--allow-root"]

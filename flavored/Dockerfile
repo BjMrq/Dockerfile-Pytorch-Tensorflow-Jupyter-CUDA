@@ -1,7 +1,15 @@
 # Start the unflavored version of bjmrq/jupyter
-FROM bjmrq/jupyter:unflavored
+FROM bjmrq/ml-jupyter:unflavored
 
 #Then flavored it!
+
+# Pip install the dependencies
+RUN /opt/conda/bin/conda install -y -c conda-forge \
+  jupyterthemes \
+  yapf \
+  isort \
+  autopep8 
+
 # Install extensions
 RUN jupyter nbextension enable code_prettify/code_prettify
 RUN jupyter nbextension enable hinterland/hinterland
@@ -14,5 +22,3 @@ RUN apt-get update
 RUN apt install fonts-firacode
 
 RUN jt -t oceans16 -f firacode
-
-CMD ["jupyter", "notebook", "--ip", "0.0.0.0", "--port", "8888", "--allow-root"]

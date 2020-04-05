@@ -3,7 +3,7 @@ services:
   jupyter:
     build:
       context: ./unflavored
-    image: bjmrq/jupyter
+    image: bjmrq/ml-jupyter
     container_name: jupyter
     volumes:
       - ./:/home/workspace
