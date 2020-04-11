@@ -1,4 +1,4 @@
-version: "3"
+version: "2.4"
 services:
   jupyter:
     build:
@@ -7,7 +7,7 @@ services:
     container_name: jupyter
     volumes:
       - ./:/home/workspace
-    env_file: .env.exemple
+    env_file: ./.env
     ports:
       - 8888:8888
       - 6006:6006

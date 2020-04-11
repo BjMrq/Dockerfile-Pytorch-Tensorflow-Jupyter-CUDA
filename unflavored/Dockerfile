@@ -1,3 +1,4 @@
+# ============================================================================
 # Step 1 CUDA
 # ============================================================================
 
@@ -21,7 +22,7 @@ ARG LIBNVINFER_MAJOR_VERSION=6
 # Needed for string substitution
 SHELL ["/bin/bash", "-c"]
 # Pick up some TF dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends\
   build-essential \
   cuda-command-line-tools-${CUDA/./-} \
   # There appears to be a regression in libcublas10=10.2.2.89-1 which
@@ -35,6 +36,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   cuda-cusparse-${CUDA/./-} \
   cmake \
   git \
+  wget \
   curl \
   ca-certificates \
   libjpeg-dev \
@@ -45,7 +47,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libzmq3-dev \
   pkg-config \
   software-properties-common \
-  unzip 
+  unzip && \
+  rm -rf /var/lib/apt/lists/*
 
 # Install TensorRT if not building for PowerPC
 RUN [[ "${ARCH}" = "ppc64le" ]] || { apt-get update && \
@@ -64,41 +67,47 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/lib
   && ldconfig
 
 
+# ============================================================================
 # Step2 Conda, Python and Jupiter
 # ============================================================================
 
 ARG PYTHON_VERSION=3.6
+ENV CONDA_DIR=/opt/conda
 
-RUN curl -o ~/miniconda.sh -O  https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh  && \
-  chmod +x ~/miniconda.sh && \
-  ~/miniconda.sh -b -p /opt/conda && \
-  rm ~/miniconda.sh
+RUN  wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+  chmod +x Miniconda3-latest-Linux-x86_64.sh && \
+  /bin/bash Miniconda3-latest-Linux-x86_64.sh -f -b -p $CONDA_DIR && \
+  rm Miniconda3-latest-Linux-x86_64.sh
 
-ENV PATH /opt/conda/bin:$PATH
+ENV PATH $CONDA_DIR/bin:$PATH
 
 # Install Python and Jupyter
-RUN /opt/conda/bin/conda install -y \
+RUN conda install -y \
   python=$PYTHON_VERSION \
   jupyter
 
 
+# ============================================================================
 # Step3 ML packages
 # ============================================================================
 
 # Install Pytorch from pytorch channel 
-RUN opt/conda/bin/conda install -y -c pytorch \
+RUN conda install -y -c pytorch \
   pytorch \
   torchvision \
   magma-cuda100
 
 # Install Tensorflow from conda-forge channel 
-RUN opt/conda/bin/conda install -y -c conda-forge \
-  tensorflow-gpu \
+RUN conda install -y -c conda-forge \
+  tensorflow-gpu 
+
+# Install visualisation tools
+RUN conda install -y -c conda-forge \
   tensorboard \   
   tensorboardx \
   jupyter_contrib_nbextensions
 
-RUN /opt/conda/bin/conda install -y  \
+RUN conda install -y  \
   scikit-learn \
   pandas \
   matplotlib \
@@ -114,7 +123,7 @@ RUN /opt/conda/bin/conda install -y  \
   cython 
 
 # Cleanning
-RUN opt/conda/bin/conda clean -ya
+RUN conda clean -ya
 
 # Enable extension
 RUN jupyter contrib nbextension install 
