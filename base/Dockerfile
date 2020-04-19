@@ -86,50 +86,8 @@ RUN conda install -y \
   python=$PYTHON_VERSION \
   jupyter
 
-
-# ============================================================================
-# Step3 ML packages
-# ============================================================================
-
-# Install Pytorch from pytorch channel 
-RUN conda install -y -c pytorch \
-  pytorch \
-  torchvision \
-  magma-cuda100
-
-# Install Tensorflow from conda-forge channel 
-RUN conda install -y -c conda-forge \
-  tensorflow-gpu 
-
-# Install visualisation tools
-RUN conda install -y -c conda-forge \
-  tensorboard \   
-  tensorboardx \
-  jupyter_contrib_nbextensions
-
-RUN conda install -y  \
-  scikit-learn \
-  pandas \
-  matplotlib \
-  seaborn \
-  numpy \
-  pyyaml \
-  scipy \
-  ipython \
-  nodejs \
-  nbconvert \
-  scikit-image \
-  mkl-include \
-  cython 
-
 # Cleanning
 RUN conda clean -ya
-
-# Enable extension
-RUN jupyter contrib nbextension install 
-
-# Install tensorboard for Jupyter
-RUN pip install jupyter_tensorboard
 
 # Make it working directory
 WORKDIR /home/workspace

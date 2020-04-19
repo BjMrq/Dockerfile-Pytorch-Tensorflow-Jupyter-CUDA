@@ -1,14 +1,17 @@
 # Start the unflavored version of bjmrq/jupyter
-FROM bjmrq/ml-jupyter:unflavored
+FROM bjmrq/ml-jupyter:basic
 
 #Then flavored it!
 
 # Pip install the dependencies
-RUN /opt/conda/bin/conda install -y -c conda-forge \
+RUN conda install -y -c conda-forge \
   jupyterthemes \
   yapf \
   isort \
-  autopep8 
+  autopep8
+
+# Cleanning
+RUN conda clean -ya 
 
 # Install extensions
 RUN jupyter nbextension enable code_prettify/code_prettify

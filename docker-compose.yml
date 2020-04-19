@@ -2,7 +2,7 @@ version: "2.4"
 services:
   jupyter:
     build:
-      context: ./unflavored
+      context: ./basic
     image: bjmrq/ml-jupyter
     container_name: jupyter
     volumes:
