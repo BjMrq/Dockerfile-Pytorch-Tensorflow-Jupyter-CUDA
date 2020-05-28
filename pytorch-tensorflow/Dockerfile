@@ -12,7 +12,7 @@ RUN conda install -y -c pytorch \
   magma-cuda100
 
 # Install Tensorflow from conda-forge channel 
-RUN conda install -y -c conda-forge \
+RUN conda install -y -c anaconda \
   tensorflow-gpu 
 
 # Install visualisation tools from conda-forge channel 

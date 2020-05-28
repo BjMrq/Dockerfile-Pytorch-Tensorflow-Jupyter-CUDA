@@ -1,9 +1,9 @@
 # Start the unflavored version of bjmrq/jupyter
 FROM bjmrq/ml-jupyter:basic
 
-#Then flavored it!
+# Then flavored it!
 
-# Pip install the dependencies
+# Conda install the dependencies
 RUN conda install -y -c conda-forge \
   jupyterthemes \
   yapf \
