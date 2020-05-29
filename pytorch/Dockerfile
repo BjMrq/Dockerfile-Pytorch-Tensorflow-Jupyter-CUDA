@@ -1,5 +1,5 @@
 # Start the unflavored version of bjmrq/ml-jupyter
-FROM bjmrq/ml-jupyter:basic
+FROM bjmrq/ml-jupyter:basic-python3.6
 
 
 # ============================================================================
