@@ -71,7 +71,7 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/lib
 # Step2 Conda, Python and Jupiter
 # ============================================================================
 
-ARG PYTHON_VERSION=3.8
+ARG PYTHON_VERSION=3.6
 ENV CONDA_DIR=/opt/conda
 
 RUN  wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
