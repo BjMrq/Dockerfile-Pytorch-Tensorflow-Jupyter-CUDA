@@ -2,7 +2,7 @@ version: "2.4"
 services:
   jupyter:
     build:
-      context: ./pytorch
+      context: ./basic/python3.8
     image: bjmrq/ml-jupyter
     container_name: jupyter
     volumes:
